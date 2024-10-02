@@ -59,8 +59,16 @@ def generate_image(prompt=None):
         height = int(request.args.get('height', 300))
         style = request.args.get('style', 'default')
 
+        # If prompt is not in the URL path, check if it's in the query string
+        if prompt is None:
+            prompt = request.args.get('prompt')
+
+        # If prompt is still None, return an error
+        if prompt is None:
+            return "Error: No prompt provided", 400
+
         # Decode the URL-encoded prompt
-        decoded_prompt = unquote(prompt) if prompt else "No prompt provided"
+        decoded_prompt = unquote(prompt)
         
         # Generate the image using the cached function
         image = generate_image_with_text(decoded_prompt, width, height, style)
@@ -78,7 +86,7 @@ def generate_image(prompt=None):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('index.html', error="Invalid path. Please use /generate/<prompt> to generate an image."), 404
+    return render_template('index.html', error="Invalid path. Please use /generate/<prompt> or /generate?prompt=<prompt> to generate an image."), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
