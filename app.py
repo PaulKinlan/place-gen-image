@@ -20,7 +20,7 @@ def index():
     return render_template('index.html')
 
 @cache.memoize(timeout=300)  # Cache for 5 minutes
-def generate_image_with_text(prompt, width=400, height=300):
+def generate_image_with_text(prompt, width=400, height=300, style="default"):
     # Create a new image with a white background
     image = Image.new('RGB', (width, height), color='white')
     draw = ImageDraw.Draw(image)
@@ -28,8 +28,18 @@ def generate_image_with_text(prompt, width=400, height=300):
     # Use a default font
     font = ImageFont.load_default()
 
+    # Apply style
+    if style == "bold":
+        draw.rectangle([0, 0, width, height], fill='black')
+        text_color = 'white'
+    elif style == "colorful":
+        draw.rectangle([0, 0, width, height], fill='pink')
+        text_color = 'blue'
+    else:  # default style
+        text_color = 'black'
+
     # Draw the prompt text on the image
-    draw.text((10, 10), prompt, fill='black', font=font)
+    draw.text((10, 10), prompt, fill=text_color, font=font)
 
     return image
 
@@ -39,13 +49,21 @@ def generate_image(prompt=None):
     try:
         if request.method == 'POST':
             prompt = request.form['prompt']
-            return redirect(url_for('generate_image', prompt=prompt))
+            width = int(request.form.get('width', 400))
+            height = int(request.form.get('height', 300))
+            style = request.form.get('style', 'default')
+            return redirect(url_for('generate_image', prompt=prompt, width=width, height=height, style=style))
+
+        # Get parameters from URL for GET requests
+        width = int(request.args.get('width', 400))
+        height = int(request.args.get('height', 300))
+        style = request.args.get('style', 'default')
 
         # Decode the URL-encoded prompt
         decoded_prompt = unquote(prompt) if prompt else "No prompt provided"
         
         # Generate the image using the cached function
-        image = generate_image_with_text(decoded_prompt)
+        image = generate_image_with_text(decoded_prompt, width, height, style)
         
         # Convert the image to bytes
         img_io = BytesIO()

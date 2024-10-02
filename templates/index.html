@@ -13,15 +13,22 @@
         <p class="error">{{ error }}</p>
         {% endif %}
         <p>To generate an image, use the following URL format:</p>
-        <code>http://localhost:5000/generate/your image prompt here</code>
+        <code>http://localhost:5000/generate/your image prompt here?width=400&height=300&style=default</code>
         <p>Or use the form below:</p>
         <form action="/generate" method="post">
             <input type="text" name="prompt" placeholder="Enter your image prompt" required>
+            <input type="number" name="width" placeholder="Width" value="400" min="100" max="1000">
+            <input type="number" name="height" placeholder="Height" value="300" min="100" max="1000">
+            <select name="style">
+                <option value="default">Default</option>
+                <option value="bold">Bold</option>
+                <option value="colorful">Colorful</option>
+            </select>
             <button type="submit">Generate Image</button>
         </form>
         <p>Example:</p>
-        <a href="/generate/a beautiful landscape with mountains and a lake" target="_blank">
-            http://localhost:5000/generate/a beautiful landscape with mountains and a lake
+        <a href="/generate/a beautiful landscape with mountains and a lake?width=600&height=400&style=colorful" target="_blank">
+            http://localhost:5000/generate/a beautiful landscape with mountains and a lake?width=600&height=400&style=colorful
         </a>
     </div>
 </body>
