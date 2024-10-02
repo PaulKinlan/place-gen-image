@@ -4,9 +4,11 @@ from flask import Flask, render_template, send_file, request, redirect, url_for
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from io import BytesIO
 from urllib.parse import unquote
+import requests
+from openai import OpenAI
 
 app = Flask(__name__)
 
@@ -25,33 +27,32 @@ limiter = Limiter(
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Initialize OpenAI client
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @cache.memoize(timeout=300)  # Cache for 5 minutes
-def generate_image_with_text(prompt, width=400, height=300, style="default"):
-    # Create a new image with a white background
-    image = Image.new('RGB', (width, height), color='white')
-    draw = ImageDraw.Draw(image)
+def generate_image_with_text(prompt, width=1024, height=1024, style="vivid"):
+    try:
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size=f"{width}x{height}",
+            quality="standard",
+            n=1,
+            style=style
+        )
 
-    # Use a default font
-    font = ImageFont.load_default()
-
-    # Apply style
-    if style == "bold":
-        draw.rectangle([0, 0, width, height], fill='black')
-        text_color = 'white'
-    elif style == "colorful":
-        draw.rectangle([0, 0, width, height], fill='pink')
-        text_color = 'blue'
-    else:  # default style
-        text_color = 'black'
-
-    # Draw the prompt text on the image
-    draw.text((10, 10), prompt, fill=text_color, font=font)
-
-    return image
+        image_url = response.data[0].url
+        image_data = requests.get(image_url).content
+        image = Image.open(BytesIO(image_data))
+        return image
+    except Exception as e:
+        logger.error(f"Error generating image with DALL-E 3: {str(e)}")
+        raise
 
 @app.route('/generate', methods=['GET', 'POST'])
 @app.route('/generate/<path:prompt>', methods=['GET'])
@@ -60,15 +61,15 @@ def generate_image(prompt=None):
     try:
         if request.method == 'POST':
             prompt = request.form['prompt']
-            width = int(request.form.get('width', 400))
-            height = int(request.form.get('height', 300))
-            style = request.form.get('style', 'default')
+            width = int(request.form.get('width', 1024))
+            height = int(request.form.get('height', 1024))
+            style = request.form.get('style', 'vivid')
             return redirect(url_for('generate_image', prompt=prompt, width=width, height=height, style=style))
 
         # Get parameters from URL for GET requests
-        width = int(request.args.get('width', 400))
-        height = int(request.args.get('height', 300))
-        style = request.args.get('style', 'default')
+        width = int(request.args.get('width', 1024))
+        height = int(request.args.get('height', 1024))
+        style = request.args.get('style', 'vivid')
 
         # If prompt is not in the URL path, check if it's in the query string
         if prompt is None:
