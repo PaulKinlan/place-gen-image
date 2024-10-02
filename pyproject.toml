@@ -12,4 +12,5 @@ dependencies = [
     "flux>=1.3.5",
     "pillow>=10.4.0",
     "flask-caching>=2.3.0",
+    "flask-limiter>=3.8.0",
 ]

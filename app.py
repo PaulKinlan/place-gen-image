@@ -2,6 +2,8 @@ import os
 import logging
 from flask import Flask, render_template, send_file, request, redirect, url_for
 from flask_caching import Cache
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from urllib.parse import unquote
@@ -10,6 +12,14 @@ app = Flask(__name__)
 
 # Configure caching
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+
+# Configure rate limiting
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["100 per minute"],
+    storage_uri="memory://"
+)
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +55,7 @@ def generate_image_with_text(prompt, width=400, height=300, style="default"):
 
 @app.route('/generate', methods=['GET', 'POST'])
 @app.route('/generate/<path:prompt>', methods=['GET'])
+@limiter.limit("5 per minute")
 def generate_image(prompt=None):
     try:
         if request.method == 'POST':
@@ -87,6 +98,10 @@ def generate_image(prompt=None):
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('index.html', error="Invalid path. Please use /generate/<prompt> or /generate?prompt=<prompt> to generate an image."), 404
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return "Rate limit exceeded. Please try again later.", 429
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
