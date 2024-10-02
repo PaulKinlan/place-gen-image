@@ -1,8 +1,7 @@
 import os
 import logging
-from flask import Flask, render_template, send_file, request
-from diffusers import StableDiffusionPipeline
-import torch
+from flask import Flask, render_template, send_file, request, redirect, url_for
+from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from urllib.parse import unquote
 
@@ -12,42 +11,36 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize the Stable Diffusion pipeline
-model_id = "runwayml/stable-diffusion-v1-5"
-pipe = None
-
-def load_model():
-    global pipe
-    try:
-        pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
-        if torch.cuda.is_available():
-            pipe = pipe.to("cuda")
-        else:
-            pipe = pipe.to("cpu")
-        logger.info("Model loaded successfully")
-    except Exception as e:
-        logger.error(f"Error loading model: {str(e)}")
-        pipe = None
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/generate/<path:prompt>')
-def generate_image(prompt):
-    global pipe
-    if pipe is None:
-        load_model()
-    
-    if pipe is None:
-        return "Error: Unable to load the model. Please try again later.", 500
+def generate_image_with_text(prompt, width=400, height=300):
+    # Create a new image with a white background
+    image = Image.new('RGB', (width, height), color='white')
+    draw = ImageDraw.Draw(image)
 
+    # Use a default font
+    font = ImageFont.load_default()
+
+    # Draw the prompt text on the image
+    draw.text((10, 10), prompt, fill='black', font=font)
+
+    return image
+
+@app.route('/generate', methods=['GET', 'POST'])
+@app.route('/generate/<path:prompt>', methods=['GET'])
+def generate_image(prompt=None):
     try:
+        if request.method == 'POST':
+            prompt = request.form['prompt']
+            return redirect(url_for('generate_image', prompt=prompt))
+
         # Decode the URL-encoded prompt
-        decoded_prompt = unquote(prompt)
+        decoded_prompt = unquote(prompt) if prompt else "No prompt provided"
         
-        # Generate the image
-        image = pipe(decoded_prompt).images[0]
+        # Generate the image using Pillow
+        image = generate_image_with_text(decoded_prompt)
         
         # Convert the image to bytes
         img_io = BytesIO()
@@ -65,5 +58,4 @@ def page_not_found(e):
     return render_template('index.html', error="Invalid path. Please use /generate/<prompt> to generate an image."), 404
 
 if __name__ == '__main__':
-    load_model()
     app.run(host='0.0.0.0', port=5000, debug=True)

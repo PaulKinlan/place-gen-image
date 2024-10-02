@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stable Diffusion Image Generator</title>
+    <title>Pillow Image Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Stable Diffusion Image Generator</h1>
+        <h1>Pillow Image Generator</h1>
         {% if error %}
         <p class="error">{{ error }}</p>
         {% endif %}
         <p>To generate an image, use the following URL format:</p>
         <code>http://localhost:5000/generate/your image prompt here</code>
-        <p>For example:</p>
+        <p>Or use the form below:</p>
+        <form action="/generate" method="post">
+            <input type="text" name="prompt" placeholder="Enter your image prompt" required>
+            <button type="submit">Generate Image</button>
+        </form>
+        <p>Example:</p>
         <a href="/generate/a beautiful landscape with mountains and a lake" target="_blank">
             http://localhost:5000/generate/a beautiful landscape with mountains and a lake
         </a>
