@@ -1,0 +1,42 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+    padding: 20px;
+}
+
+h1 {
+    color: #333;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+code {
+    background-color: #e0e0e0;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.error {
+    color: #ff0000;
+    font-weight: bold;
+}
