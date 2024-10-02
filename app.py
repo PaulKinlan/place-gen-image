@@ -1,11 +1,15 @@
 import os
 import logging
 from flask import Flask, render_template, send_file, request, redirect, url_for
+from flask_caching import Cache
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from urllib.parse import unquote
 
 app = Flask(__name__)
+
+# Configure caching
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -15,6 +19,7 @@ logger = logging.getLogger(__name__)
 def index():
     return render_template('index.html')
 
+@cache.memoize(timeout=300)  # Cache for 5 minutes
 def generate_image_with_text(prompt, width=400, height=300):
     # Create a new image with a white background
     image = Image.new('RGB', (width, height), color='white')
@@ -39,7 +44,7 @@ def generate_image(prompt=None):
         # Decode the URL-encoded prompt
         decoded_prompt = unquote(prompt) if prompt else "No prompt provided"
         
-        # Generate the image using Pillow
+        # Generate the image using the cached function
         image = generate_image_with_text(decoded_prompt)
         
         # Convert the image to bytes
