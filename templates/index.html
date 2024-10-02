@@ -52,11 +52,26 @@
                     <code>http://localhost:5000/generate/your image prompt here?width=1024&height=1024&style=vivid</code>
                 </li>
             </ol>
-            <h3>Example:</h3>
-            <a href="/generate/a beautiful landscape with mountains and a lake?width=1024&height=1024&style=natural" target="_blank" class="example-link">
-                Generate a natural landscape
-            </a>
+            <h3>Try an Example:</h3>
+            <div class="example-container">
+                <input type="text" id="examplePrompt" placeholder="Enter an example prompt" value="a beautiful landscape with mountains and a lake">
+                <button onclick="updateExampleLink()">Update Example</button>
+                <a id="exampleLink" href="/generate/a beautiful landscape with mountains and a lake?width=1024&height=1024&style=natural" target="_blank" class="example-link">
+                    Generate a natural landscape
+                </a>
+            </div>
         </div>
     </div>
+    <script>
+        function updateExampleLink() {
+            const prompt = document.getElementById('examplePrompt').value;
+            const encodedPrompt = encodeURIComponent(prompt);
+            const link = document.getElementById('exampleLink');
+            link.href = `/generate/${encodedPrompt}?width=1024&height=1024&style=natural`;
+            link.textContent = `Generate: ${prompt}`;
+        }
+        // Initialize the example link
+        updateExampleLink();
+    </script>
 </body>
 </html>
