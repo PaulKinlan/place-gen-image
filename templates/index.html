@@ -54,9 +54,7 @@
             </ol>
             <h3>Try an Example:</h3>
             <div class="example-container">
-                <input type="text" id="examplePrompt" placeholder="Enter an example prompt" value="a beautiful landscape with mountains and a lake">
-                <button onclick="updateExampleLink()">Update Example</button>
-                <a id="exampleLink" href="/generate/a%20beautiful%20landscape%20with%20mountains%20and%20a%20lake?width=1024&height=1024&style=natural" target="_blank" class="example-link">
+                <a id="exampleLink" href="/generate/a%20beautiful%20landscape%20with%20mountains%20and%20a%20lake?width=1024&height=1024&style=vivid" target="_blank" class="example-link">
                     Generate: a beautiful landscape with mountains and a lake
                 </a>
             </div>
@@ -64,16 +62,24 @@
     </div>
     <script>
         function updateExampleLink() {
-            const prompt = document.getElementById('examplePrompt').value;
+            const prompt = document.getElementById('prompt').value;
+            const width = document.getElementById('width').value;
+            const height = document.getElementById('height').value;
+            const style = document.getElementById('style').value;
             const encodedPrompt = encodeURIComponent(prompt);
             const link = document.getElementById('exampleLink');
-            link.href = `/generate/${encodedPrompt}?width=1024&height=1024&style=natural`;
-            link.textContent = `Generate: ${prompt}`;
+            link.href = `/generate/${encodedPrompt}?width=${width}&height=${height}&style=${style}`;
+            link.textContent = `Generate: ${prompt || 'a beautiful landscape with mountains and a lake'}`;
         }
+
+        // Add event listeners to form inputs
+        document.getElementById('prompt').addEventListener('input', updateExampleLink);
+        document.getElementById('width').addEventListener('change', updateExampleLink);
+        document.getElementById('height').addEventListener('change', updateExampleLink);
+        document.getElementById('style').addEventListener('change', updateExampleLink);
+
         // Initialize the example link
         updateExampleLink();
-        // Add event listener to update link on input change
-        document.getElementById('examplePrompt').addEventListener('input', updateExampleLink);
     </script>
 </body>
 </html>
