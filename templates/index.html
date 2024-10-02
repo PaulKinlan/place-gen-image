@@ -3,33 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pillow Image Generator</title>
+    <title>Image Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Pillow Image Generator</h1>
+        <h1>Image Generator</h1>
         {% if error %}
         <p class="error">{{ error }}</p>
         {% endif %}
-        <p>To generate an image, use the following URL format:</p>
-        <code>http://localhost:5000/generate/your image prompt here?width=400&height=300&style=default</code>
-        <p>Or use the form below:</p>
-        <form action="/generate" method="post">
-            <input type="text" name="prompt" placeholder="Enter your image prompt" required>
-            <input type="number" name="width" placeholder="Width" value="400" min="100" max="1000">
-            <input type="number" name="height" placeholder="Height" value="300" min="100" max="1000">
-            <select name="style">
-                <option value="default">Default</option>
-                <option value="bold">Bold</option>
-                <option value="colorful">Colorful</option>
-            </select>
-            <button type="submit">Generate Image</button>
-        </form>
-        <p>Example:</p>
-        <a href="/generate/a beautiful landscape with mountains and a lake?width=600&height=400&style=colorful" target="_blank">
-            http://localhost:5000/generate/a beautiful landscape with mountains and a lake?width=600&height=400&style=colorful
-        </a>
+        <div class="form-container">
+            <h2>Generate an Image</h2>
+            <form action="/generate" method="post" class="image-form">
+                <div class="form-group">
+                    <label for="prompt">Image Prompt:</label>
+                    <input type="text" id="prompt" name="prompt" placeholder="Enter your image prompt" required>
+                </div>
+                <div class="form-group">
+                    <label for="width">Width:</label>
+                    <input type="number" id="width" name="width" value="400" min="100" max="1000">
+                </div>
+                <div class="form-group">
+                    <label for="height">Height:</label>
+                    <input type="number" id="height" name="height" value="300" min="100" max="1000">
+                </div>
+                <div class="form-group">
+                    <label for="style">Style:</label>
+                    <select id="style" name="style">
+                        <option value="default">Default</option>
+                        <option value="bold">Bold</option>
+                        <option value="colorful">Colorful</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Generate Image</button>
+            </form>
+        </div>
+        <div class="info-container">
+            <h2>How to Use</h2>
+            <p>You can generate images in two ways:</p>
+            <ol>
+                <li>Use the form above to input your prompt and customize image settings.</li>
+                <li>Use the following URL format:
+                    <code>http://localhost:5000/generate/your image prompt here?width=400&height=300&style=default</code>
+                </li>
+            </ol>
+            <h3>Example:</h3>
+            <a href="/generate/a beautiful landscape with mountains and a lake?width=600&height=400&style=colorful" target="_blank" class="example-link">
+                Generate a colorful landscape
+            </a>
+        </div>
     </div>
 </body>
 </html>
